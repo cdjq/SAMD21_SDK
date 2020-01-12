@@ -1,0 +1,35 @@
+#######################################
+# Syntax Coloring Map For DFRobot_EasyFlash
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+DFRobot_EasyFlash	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+OptimizeMemory	KEYWORD2
+format	KEYWORD2
+setValue	KEYWORD2
+getValue	KEYWORD2
+delValue	KEYWORD2
+logRead	KEYWORD2
+logWrite	KEYWORD2
+logClean   KEYWORD2
+logSize   KEYWORD2
+
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
