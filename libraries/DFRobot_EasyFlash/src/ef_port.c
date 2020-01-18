@@ -159,9 +159,9 @@ EfErrCode ef_port_write(uint32_t addr, const uint32_t *buf, size_t size) {
         transfer(*((uint8_t *)buf+i));
       }
       CS_H;
-	  addr += 256;
+	  addr += max;
 	  buf += 8;
-	  size -= 256;
+	  size -= max;
 	}  
     return result;
 }
