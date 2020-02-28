@@ -19,13 +19,13 @@ void setup() {
   SerialUSB.begin(115200);
   delay(5000);
   SerialUSB.print("Initializing FlashDisk...");
-  if (!UD.begin(32)) {
+  if (!SD.begin(32)) {
     SerialUSB.println("initialization failed!");
     while (1);
   }
   SerialUSB.println("initialization done.");
   File myFile;
-  myFile = UD.open("abc.csv");           //以读的方式打开abc.csv文件，如果该文件不存在，先运行write.ino创建并写入abc.csv
+  myFile = SD.open("abc.csv");           //以读的方式打开abc.csv文件，如果该文件不存在，先运行write.ino创建并写入abc.csv
   DFRobot_CSV csv(myFile);
   if (myFile) {
       int row = csv.getRow();
