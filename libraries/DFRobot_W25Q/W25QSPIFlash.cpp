@@ -1,8 +1,9 @@
 #include <W25QSPIFlash.h>
 #define CS_H  digitalWrite(_csPin, HIGH)
 #define CS_L  digitalWrite(_csPin, LOW)
-void W25QSPIFlash::readUniqueID(uint8_t *recData)
+void W25QX::readUniqueID(void *recData)
 {
+  uint8_t * data = (uint8_t *)recData;
   while(w25QBusy());
   CS_L;
   SPI.transfer(0x4B);
@@ -11,12 +12,12 @@ void W25QSPIFlash::readUniqueID(uint8_t *recData)
   SPI.transfer(0xFF);
   SPI.transfer(0xFF);
   for(int i = 0; i < 8; i++){
-    *recData = SPI.transfer(0xFF);
-    recData++;
+    *(data) = SPI.transfer(0xFF);
+    data++;
   }
   CS_H;
 }
-uint8_t W25QSPIFlash::w25QBusy(void) //判断W25Q16是否繁忙函数 繁忙则返回1
+uint8_t W25QX::w25QBusy(void) //判断W25Q16是否繁忙函数 繁忙则返回1
 {
     uint8_t flag;
     CS_L;
@@ -27,7 +28,7 @@ uint8_t W25QSPIFlash::w25QBusy(void) //判断W25Q16是否繁忙函数 繁忙则�
     return flag;
 }
 
-void W25QSPIFlash::w25QRead(uint32_t address,uint8_t *data,uint16_t len)//从W25Q16中的address地址上读取 j个字节的数据保存到 以data为首地址的内存中
+void W25QX::read(uint32_t address, void *data, uint16_t len)//从W25Q16中的address地址上读取 j个字节的数据保存到 以data为首地址的内存中
 {
     uint16_t i;
     while(w25QBusy());
@@ -38,18 +39,18 @@ void W25QSPIFlash::w25QRead(uint32_t address,uint8_t *data,uint16_t len)//从W25
     SPI.transfer(address);
     for(i=0;i<len;i++)
     {
-        *(data+i)=SPI.transfer(0xFF);
+        *((uint8_t *)data+i)=SPI.transfer(0xFF);
     }
     CS_H;
 }
-void W25QSPIFlash::writeEnable(void) //写使能函数 对W25Q16进行写操作之前要进行这一步操作
+void W25QX::writeEnable(void) //写使能函数 对W25Q16进行写操作之前要进行这一步操作
 {
     CS_L;
     SPI.transfer(0x06);
     CS_H;
 }
 
-void W25QSPIFlash::eraseSector(uint32_t address)
+void W25QX::eraseSector(uint32_t address)
 {
     while(w25QBusy());
     writeEnable();                              
@@ -63,9 +64,10 @@ void W25QSPIFlash::eraseSector(uint32_t address)
 }
 
 
-void W25QSPIFlash::w25QWrite(uint32_t address,const uint8_t *data,uint16_t left)
+void W25QX::write(uint32_t address,const void *data,uint16_t left)
 {
     uint16_t max;
+	uint8_t * dat = (uint8_t *)data;
 	while(left) {
       while(w25QBusy());//如果芯片繁忙就等在这里
   //    EraseSector(address);
@@ -80,19 +82,19 @@ void W25QSPIFlash::w25QWrite(uint32_t address,const uint8_t *data,uint16_t left)
 	  else 
 		max = left;
       for(uint16_t i=0;i<max;i++) {
-        SPI.transfer(*(data+i));
+        SPI.transfer(*(dat+i));
       }
       CS_H;
 	  address += max;
-	  data += max;
+	  dat += max;
 	  left -= max;
 	}  
 }
 
 
-void W25QSPIFlash::setCSPin(uint8_t pinNum)
+void W25QX::setCSPin(uint8_t pinNum)
 {
 	_csPin = pinNum;
 }
 
-W25QSPIFlash SPIFlash;
+W25QX SPIFlash;

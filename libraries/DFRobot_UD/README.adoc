@@ -1,6 +1,6 @@
-= SD Library for Arduino =
+= UD Library for Arduino =
 
-The SD library allows for reading from and writing to SD cards.
+The UD library allows for reading from and writing to extern SPIflash.
 
 For more information about this library please visit us at
 http://www.arduino.cc/en/Reference/SD

@@ -149,31 +149,71 @@ uint8_t SdVolume::chainSize(uint32_t cluster, uint32_t* size) const {
 //------------------------------------------------------------------------------
 // Fetch a FAT entry
 uint8_t SdVolume::fatGet(uint32_t cluster, uint32_t* value) const {
-  uint8_t valueL, valueM;
-  uint16_t temp;
-  if (cluster > (clusterCount_ + 1)) return false;
+  uint8_t valueL, valueM, clu;
+  uint16_t offBlo;
+  uint16_t triClu = cluster/1024;uint16_t offClu = cluster %1024;
   uint32_t lba = fatStartBlock_;
-  lba +=  cluster / 341;
+  if (cluster > (clusterCount_ + 1)) return false;
+//  lba +=  cluster / 341;
+  
+
+  if (offClu<342) clu = 0;
+  else if (offClu<683) clu = 1;
+  else clu =2;
+  lba += (triClu * 3 + clu);
+   
+
   if (lba != cacheBlockNumber_) {
     if (!cacheRawBlock(lba, CACHE_FOR_READ)) return false;
   }
-  temp =  cluster % 341 * 1.5;
-  if (temp %3 == 0) {
-    valueL = cacheBuffer_.data[temp];
-    valueM = cacheBuffer_.data[temp + 1] & 0x0F;
-	*value = (valueM << 8) + valueL;
+  
+  if((offClu !=341) && (offClu !=682)) {
+    switch (clu) {
+      case 0:
+	    offBlo =  offClu % 341 * 1.5;
+        break;
+      case 1: 
+	    offBlo = (offClu-1) % 341 * 1.5 + 1;
+        break;
+      case 2:
+        offBlo = (offClu-1) % 341 * 1.5 + 0.5;
+		break;
+	  default: return false;
+    }
+    if(offClu % 2) {
+		    valueL = cacheBuffer_.data[offBlo]>>4;
+		    valueM = cacheBuffer_.data[offBlo+1];
+		    *value = (valueM << 4) + valueL;
+	} else {
+			valueL = cacheBuffer_.data[offBlo];
+            valueM = cacheBuffer_.data[offBlo+1] &0x0F;
+            *value = (valueM << 8) + valueL;
+	}	
   } else {
-	valueL =  cacheBuffer_.data[temp] >> 4;
-	valueM = cacheBuffer_.data[temp +1];
-	*value = (valueM << 4) + valueL;
-  }	
+	  switch (offClu) {
+		  case 341:
+		    valueL = cacheBuffer_.data[511]>>4;
+            cacheRawBlock(lba+1, CACHE_FOR_READ);
+            valueM = cacheBuffer_.data[0];
+            *value = (valueM << 4) + valueL;
+			break;
+		  case 682:
+		    valueL = cacheBuffer_.data[511];
+		    cacheRawBlock(lba+1, CACHE_FOR_READ);
+		    valueM = cacheBuffer_.data[0] & 0x0F;
+		    *value = (valueM << 8) + valueL;
+            break;
+        default: return false;
+	  }
+  }
   return true;
 }
 
 //------------------------------------------------------------------------------
 // Store a FAT entry
 uint8_t SdVolume::fatPut(uint32_t cluster, uint32_t value) {
-	uint16_t temp;
+  uint8_t valueL, valueM, clu;
+  uint16_t offBlo;uint16_t triClu = cluster/1024;uint16_t offClu = cluster %1024;
   // error if reserved cluster
   if (cluster < 2) return false;
 
@@ -182,25 +222,61 @@ uint8_t SdVolume::fatPut(uint32_t cluster, uint32_t value) {
 
   // calculate block address for entry
   uint32_t lba = fatStartBlock_;
-  Serial.println(cluster);
-  lba +=  cluster / 341;
+//  lba +=  cluster / 341;
+
+
+  if (offClu<342) clu = 0;
+  else if (offClu<683) clu = 1;
+  else clu =2;
+  lba += (triClu * 3 + clu);
 
   if (lba != cacheBlockNumber_) {
     if (!cacheRawBlock(lba, CACHE_FOR_READ)) return false;
   }
-  temp =  cluster % 341 * 1.5;
-  Serial.print("temp");Serial.println(temp);
-  // store entry
-    if (temp %3 == 0) {
-    cacheBuffer_.data[temp] = value & 0xFF;
-    cacheBuffer_.data[temp + 1] = (cacheBuffer_.data[temp + 1] & 0XF0) + ((value & 0x0F00)>>8);
+
+  if((offClu !=341) && (offClu !=682)) {
+    switch (clu) {
+      case 0: 
+	    offBlo =  offClu % 341 * 1.5;
+        break;
+      case 1: 
+	    offBlo = (offClu-1) % 341 * 1.5 + 1;
+        break;
+      case 2:
+        offBlo = (offClu-1) % 341 * 1.5 + 0.5;
+		break;
+	  default: return false;
+    }
+    if(offClu % 2) {
+        cacheBuffer_.data[offBlo] = ((value & 0x0F) << 4) + (cacheBuffer_.data[offBlo] & 0x0F);
+        cacheBuffer_.data[offBlo+1] = (value & 0x0FF0) >> 4;		
+	} else {
+		cacheBuffer_.data[offBlo] = value & 0xFF;
+		cacheBuffer_.data[offBlo+1] = (cacheBuffer_.data[offBlo+1] & 0xF0) + ((value & 0x0F00) >> 8);
+	}
+    cacheMirrorBlock_ = lba + blocksPerFat_;	
   } else {
-	cacheBuffer_.data[temp] =(cacheBuffer_.data[temp] & 0X0F) + ((value & 0x0F)<<4);
-	cacheBuffer_.data[temp + 1] = (value & 0x0FF0) >>4;
-  }	  
+	  switch (offClu) {
+		  case 341:
+		    cacheBuffer_.data[511] = ((value & 0x0F) << 4) + (cacheBuffer_.data[511] & 0x0F);
+            cacheSetDirty();
+			cacheMirrorBlock_ = lba + blocksPerFat_;
+            cacheRawBlock(lba+1, CACHE_FOR_READ);
+		    cacheBuffer_.data[0] = (value & 0x0FF0) >> 4;
+			break;
+		  case 682:
+		    cacheBuffer_.data[511] = value & 0xFF;
+            cacheSetDirty();
+			cacheMirrorBlock_ = lba + blocksPerFat_;
+            cacheRawBlock(lba+1, CACHE_FOR_READ);
+		    cacheBuffer_.data[0] = (cacheBuffer_.data[0] & 0xF0) + ((value & 0x0F00) >> 8);
+            break;
+        default: return false;
+	  }
+	  cacheMirrorBlock_ = lba + blocksPerFat_ + 1;
+  }   
   cacheSetDirty();
-  // mirror second FAT
-  if (fatCount_ > 1) cacheMirrorBlock_ = lba + blocksPerFat_;
+  
   return true;
 }
 //------------------------------------------------------------------------------
