@@ -1,23 +1,134 @@
-= GSM Library for Arduino =
+# DFRobot_CSV
 
-With the Arduino GSM Shield, this library enables an Arduino board to do most of the operations you can do with a GSM phone: place and receive voice calls, send and receive SMS, and connect to the internet over a GPRS network. 
 
-For more information about this library please visit us at
-http://www.arduino.cc/en/Reference/GSM
+## 产品链接（www.dfrobot.com）
+    SKU：FireBeetle M0
+   
+## Table of Contents
 
-== License ==
-Copyright (c) 2012 Telefónica Digital - PDI - Physical Internet Lab
+* [Summary](#summary)
+* [Installation](#installation)
+* [Methods](#methods)
+* [Compatibility](#compatibility)
+* [History](#history)
+* [Credits](#credits)
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+## Summary
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-Lesser General Public License for more details.
+### 这个库实现了用Arduino处理存在spiflashU盘或SD卡上的csv文件
+这个库应用于FireBeetle M0主板，基于ATmelSAMD21处理器和W25Q128外部spiflash。
+可以读写csv文件。
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+## Installation
+
+To use this library, first download the library file, paste it into the \Arduino\libraries directory, then open the examples folder and run the demo in the folder.
+
+## Methods
+
+```C++
+  /**
+   * @brief 构造函数
+   * @n 初始化一个对象
+   */
+    DFRobot_CSV();
+
+  /**
+   * @brief 构造函数
+   * @param 传入的File类型文件对象
+   * @n 初始化一个对象
+
+   */
+    DFRobot_CSV(File &file);
+  
+  /**
+   * @brief 往文件当前位置写入数据
+   * @param value uint8_t型数
+   * @param str 指向写入数据的指针
+   * @param buf 指向写入数据的指针
+   * @param size 数据的字节数
+   * @return 返回写入文件的字节数
+   */
+    size_t write(uint8_t value);
+	size_t write(const char *str);
+	size_t write(const uint8_t *buf, size_t size);
+	size_t write(const char *buffer, size_t size);
+	
+
+  /**
+   * @brief 往文件当前位置写入数据并加逗号，如果要写的数据不是数字，则在字符串前后加",
+            如果字符串中有",在"前加"
+   * @return 返回写入字节数
+   */
+	size_t print(const String &);
+    size_t print(const char[]);
+    size_t print(char);
+	size_t print(unsigned char, int = DEC);
+	size_t print(int, int = DEC);
+	size_t print(unsigned int, int = DEC);
+	size_t print(long, int = DEC);
+	size_t print(unsigned long, int = DEC);
+	size_t print(double, int = 2);
+
+  /**
+   * @brief 作用同print，把print后面的逗号改为换行
+   * @return 返回写入字节数
+   */	
+	size_t println(const String &s);
+    size_t println(const char[]);
+    size_t println(char);
+    size_t println(unsigned char, int = DEC);
+    size_t println(int, int = DEC);
+    size_t println(unsigned int, int = DEC);
+    size_t println(long, int = DEC);
+    size_t println(unsigned long, int = DEC);
+    size_t println(double, int = 2);
+    size_t println(void);
+
+  /**
+   * @brief 获取csv文件总行数
+   * @return 返回总行数
+   */
+    int getRow();
+	
+  /**
+   * @brief 获取指定行的列数
+   * @return 返回列数
+   */
+    int getColumn(int);
+
+  /**
+   * @brief 获取某一行的数据
+   * @n 需要用户构造一个String类型数组，并把数组首地址传入，函数运行
+        完后会将指定行的数据填充进该数组，所以该数组的元素个数必须大于
+		要获取行的列数
+   * @param row 需要获取数据的行号
+   * @param str 传入指向string的指针
+   * @return 返回运行状态
+   */	
+    bool readRow(int row, String *str);
+	
+  /**
+   * @brief 获取csv文件指定位置的数据
+   * @param row 指定的行号
+   * @param column 指定的列好
+   * @return 将获取的数据以String类型返回
+   */    
+    String readItem(int row, int column);
+
+
+## Compatibility
+
+MCU                | Work Well    | Work Wrong   | Untested    | Remarks
+------------------ | :----------: | :----------: | :---------: | -----
+FireBeetle         |      √       |              |             | 
+
+
+## History
+
+- data 2020-3-4
+- version V1.0
+
+
+## Credits
+
+Written by Jack(yue.li@dfrobot.com), 2019. (Welcome to our [website](https://www.dfrobot.com/))

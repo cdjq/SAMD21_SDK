@@ -1,7 +1,7 @@
 # DFRobot_EasyFlash
 
 
-## 产品链接（链接到英文商城）
+## 产品链接（www.dfrobot.com）
     SKU：产品名称
    
 ## Table of Contents
@@ -16,7 +16,7 @@
 ## Summary
 
 ### 这个库实现了spiflash上的数据库功能和log功能
-这个库应用于FireBeetle主板，基于ATmelSAMD21处理器和W25Q128外部spiflash。
+这个库应用于FireBeetle M0主板，基于ATmelSAMD21处理器和W25Q128外部spiflash。
 可以写入键值对，再通过键获得值。
 
 ## Installation
@@ -55,9 +55,6 @@ To use this library, first download the library file, paste it into the \Arduino
    * @return 程序运行状态
    */
     EfErrCode format(void);
-	
-	#ifdef EF_USING_ENV
-    /* supported on ef_env.c */
 
   /**
    * @brief 在数据库中设置键值对，注意key值不能超过32字节，value不能超过4010字节
@@ -102,10 +99,6 @@ To use this library, first download the library file, paste it into the \Arduino
    */
     EfErrCode delValue(const char *key);
 	EfErrCode delValue(String &key);
-    #endif
-
-    #ifdef EF_USING_LOG
-    /* ef_log.c */
 	
   /**
    * @brief 根据index和size，读取spiflash指定内容
