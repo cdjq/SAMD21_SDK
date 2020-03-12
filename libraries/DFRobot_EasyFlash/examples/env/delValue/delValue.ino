@@ -5,7 +5,7 @@
  *
  * @copyright   Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @licence     The MIT License (MIT)
- * @author [LiYue](liyue.wang@dfrobot.com)
+ * @author [LiYue](Yue.Li@dfrobot.com)
  * @version  V1.0
  * @date  2019-12-23
  * @get from https://www.dfrobot.com
@@ -15,21 +15,21 @@
 #include <DFRobot_EasyFlash.h>
 DFRobot_EasyFlash easyflash;
 
-char key[] = "How are you?";               
-char value[] = "I'm fine,thank you.";
+char key[] = "key";               
+char value[] = "value";
 char valueRec[20];
-size_t size;
-
+size_t valueLen;
+size_t getLen;
 void setup()
 {
   SerialUSB.begin(115200);
   easyflash.begin();
   easyflash.setValue(key,value);
-  getValue(key,valueRec,20，size);                //获取key对应value的长度
-  println(size);
+  getLen = easyflash.getValue(key,valueRec,20,valueLen);   //getValue()返回获得的key的长度，valueLen记录value的实际长度（获得长度小于等于用来接受的buffer长，所以可能小于实际长度）。
+  Serial.print("The length of the value is :");Serial.println(getLen);
   easyflash.delValue(key);                        //根据key删除键值对
-  getValue(key,valueRec,20,size);                 //再次获取key对应的value的长度
-  println(size);
+  getLen = easyflash.getValue(key,valueRec,20,valueLen);  //getValue()返回实际获得的长度，注意这里如果value已经删除，valueLen无法获得value的实际长度，所以valueLen的值不会变，传进来是多少函数运行完还是多少
+  Serial.print("After delete the key&value.The length of the value is :");Serial.println(getLen);
 }
 
 void loop() {

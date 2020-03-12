@@ -30,12 +30,15 @@ char key6[] = "six";
 uint8_t value6[10] = {255,128,64,32,16,8,4,2,1,0};    
 char key7[] = "seven";
 uint32_t value7[2] = {0x01020304,0x0A0B0C0D};
-uint32_t valueRec[3];
+uint8_t valueRec[12];
+uint8_t valueRec1[12];
 size_t size;
+size_t getLen;
 
 void setup()
 {
   SerialUSB.begin(115200);
+  delay(5000);                                     //等待串口稳定
   easyflash.begin();                        //初始化easyflash
   easyflash.setValue(key1,value1,7);
   easyflash.setValue(key2,value2);
@@ -43,16 +46,31 @@ void setup()
   easyflash.setValue(key4,value4);
   easyflash.setValue(key5,value5);
   easyflash.setValue(key6,value6,10);          //value6不是字符串，必须传入value6的字节数，为10
-  easyflash.setValue(key7,value7,8);           //value7不是字符串，必须传入value7字节数，为8
-  easyflash.getValue(key7,valueRec,12,size)        //获得key7对应的value值，将它存在valueRec中，第三个参数为valueRec的所占12字节，将value的实际字节数存在size中
-  SerialUSB.print("Value for key7 is: ");          //value和valueRec中所占字节数少的那个，占的字节数个数据将被得到
-  for(i=0;i<3;i++) {                               //这里value7占8字节，valueRec占12字节，只获得8字节
+  easyflash.setValue(key7,value7,8);           //value7不是字符串，必须传入value7字节数，value7是uint32_t型数组，所以长度是8
+  
+  getLen = easyflash.getValue(key7,valueRec,12,size);       //获得key7对应的value值，将它存在valueRec中，第三个参数为valueRec的长度，将value的真正长度存在size中，函数返回实际获得的字节数（实际获得可能小于value真正长度，取决于valueRec长度）
+                                                           //有一点需要注意，如果键值对不存在，则调用这个函数时，无法获得value的真实长度，这种情况下第四个参数size值不会被这个函数改变
+  SerialUSB.print("value7: ");
+  for(uint8_t i=0;i<getLen;i++) {                               //这里value7占8字节，valueRec占12字节，只获得8字节
+    SerialUSB.print(valueRec[i],HEX);
+    SerialUSB.print(" ");
+  }
+  SerialUSB.print("The value's length is: ");
+  SerialUSB.println(size);
+
+  getLen = easyflash.getValue(key7,valueRec1,12);     //也可以不传第4个参数，这样不会获得value实际长度，函数返回实际获得长度
+  SerialUSB.print("value7: ");
+    for(uint8_t i=0;i<getLen;i++) {                               //这里value7占8字节，valueRec占12字节，只获得8字节
     SerialUSB.print(valueRec[i],HEX);
     SerialUSB.print(" ");
   }
   SerialUSB.println();
-  SerialUSB.print("The value's length is: ");
-  SerialUSB.println(size);
+
+
+  String str = easyflash.getValue(key5);                        //当传一个参数时，函数将value储存在string对象返回
+                                   //  使用含一个参数getValue的前提是，key对应的value所有字节必须是字符型数据，key5对应的value5是字符串所以可以用，但key7对应的value7是数字所以不能用这个函数
+  SerialUSB.print("value5: ");
+  SerialUSB.println(str);
 }
 
 void loop() {

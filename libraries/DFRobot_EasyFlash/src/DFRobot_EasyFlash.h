@@ -91,12 +91,14 @@ public:
    * @param key String对象
    * @param valueBuf 指向存放数据的valueBuf的const void*型指针
    * @param bufLen valueBuf的字节数
-   * @param savedValueLen 指向一个size_t型数据，函数运行时会将该指针指向的值赋为value实际的字节数
+   * @param savedValueLen 指向一个size_t型数据，函数运行时会将该指针指向的值变为value的字节数
    * @param value 指向字符或字符串value的const char*型指针
    * @param value String对象
-   * @return 返回读取到的value的字节数
+   * @return 返回实际获得的字节数（不超过bufLen）
    * @return 返回String对象
-   */	
+   */
+    size_t getValue(const char *key, void *valueBuf, size_t bufLen, size_t &savedValueLen);
+	size_t getValue(String &key, void *valueBuf, size_t bufLen, size_t &savedValueLen);
 	size_t getValue(const char *key, void *valueBuf, size_t bufLen, size_t *savedValueLen);
     size_t getValue(String &key, void *valueBuf, size_t bufLen, size_t *savedValueLen);
     size_t getValue(const char *key, void *valueBuf, size_t bufLen);
@@ -195,6 +197,16 @@ inline EfErrCode DFRobot_EasyFlash::setValue(String &key, const char *value)
     return ef_set_env_blob(key.c_str(), value, strlen(value));
 }
 
+
+inline size_t DFRobot_EasyFlash::getValue(const char *key, void *valueBuf, size_t bufLen, size_t &savedValueLen)
+{   
+	return ef_get_env_blob(key, valueBuf, bufLen, &savedValueLen);
+}
+
+inline size_t DFRobot_EasyFlash::getValue(String &key, void *valueBuf, size_t bufLen, size_t &savedValueLen)
+{   
+	return ef_get_env_blob(key.c_str(), valueBuf, bufLen, &savedValueLen);
+}
 
 inline size_t DFRobot_EasyFlash::getValue(const char *key, void *valueBuf, size_t bufLen, size_t *savedValueLen)
 {   

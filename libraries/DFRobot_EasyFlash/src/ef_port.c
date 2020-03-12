@@ -142,7 +142,9 @@ EfErrCode ef_port_erase(uint32_t addr, size_t size) {
 EfErrCode ef_port_write(uint32_t addr, const uint32_t *buf, size_t size) {
     EfErrCode result = EF_NO_ERR;
 	size_t temp;
-	while(size) {
+	const uint8_t * buffer = (const uint8_t *)buf;
+
+	if((addr&0xFF) && ((addr&0xFF)+size>256)) {
 	  while(W25Q16_BUSY());
 	  Write_Enable();
 	  CS_L;
@@ -150,18 +152,37 @@ EfErrCode ef_port_write(uint32_t addr, const uint32_t *buf, size_t size) {
       transfer(addr>>16);
       transfer(addr>>8);
       transfer(addr);
-	  if(size>256)
-		max = 256;
-	  else 
-		max = size;
+	  temp = 256 - (addr&0xFF);
       for(uint16_t i=0;i<temp;i++)
       {
-        transfer(*((uint8_t *)buf+i));
+        transfer(buffer[i]);
       }
       CS_H;
-	  addr += max;
-	  buf += 8;
-	  size -= max;
+	  addr += temp;
+	  buffer += temp;
+	  size -= temp;
+	}
+
+	while(size) {
+      while(W25Q16_BUSY());
+	  Write_Enable();		
+	  CS_L;
+      transfer(0x02);
+      transfer(addr>>16);
+      transfer(addr>>8);
+      transfer(addr);
+	  if(size>256)
+		temp = 256;
+	  else 
+		temp = size;
+      for(uint16_t i=0;i<temp;i++)
+      {
+        transfer(buffer[i]);
+      }
+      CS_H;
+	  addr += temp;
+	  buffer += temp;
+	  size -= temp;
 	}  
     return result;
 }

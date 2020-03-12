@@ -1,7 +1,7 @@
 /*!
  * @file format.ino
- * @brief 设置一个键值对并通过key删除它
- * @n 实验现象：串口监视器打印出key对应value的长度
+ * @brief 格式化env区，注意这个示例会删除数据库里面所有键值对，慎用！
+ * @n 实验现象：串口监视器打印出key对应value
  *
  * @copyright   Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @licence     The MIT License (MIT)
@@ -25,14 +25,19 @@ size_t size;
 void setup()
 {
   SerialUSB.begin(115200);
+  delay(5000);                                     //等待串口稳定
   easyflash.begin();
   easyflash.setValue(key1,value1);
   easyflash.setValue(key2,value2);
-  easyflash.format();                            //这会格式化env区
   String string1 = easyflash.getValue(key1);
   String string2 = easyflash.getValue(key2);
-  SerialUSB.println(string1);
-  SerialUSB.println(string2);
+  SerialUSB.print("value1:");SerialUSB.println(string1);
+  SerialUSB.print("value2:");SerialUSB.println(string2);
+  easyflash.format();                            //这会格式化env区,删除里面所有键值对
+  string1 = easyflash.getValue(key1);
+  string2 = easyflash.getValue(key2);
+  SerialUSB.print("value1:");SerialUSB.println(string1);
+  SerialUSB.print("value2:");SerialUSB.println(string2);
 }
 
 void loop() {
