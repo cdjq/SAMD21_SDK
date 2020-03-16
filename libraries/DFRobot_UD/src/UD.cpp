@@ -1,67 +1,23 @@
-/*
-
- SD - a slightly more friendly wrapper for sdfatlib
-
- This library aims to expose a subset of SD card functionality
- in the form of a higher level "wrapper" object.
-
- License: GNU General Public License V3
+/*!
+ * @file UD.h
+ * @brief This library aims to expose a subset of UD disk functionality
+ * @n in the form of a higher level "wrapper" object.
+ * @copyright   Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
+ * @licence GNU General Public License V3
           (Because sdfatlib is licensed with this.)
-
- (C) Copyright 2010 SparkFun Electronics
-
-
- This library provides four key benefits:
-
-   * Including `SD.h` automatically creates a global
-     `SD` object which can be interacted with in a similar
-     manner to other standard global objects like `Serial` and `Ethernet`.
-
-   * Boilerplate initialisation code is contained in one method named 
-     `begin` and no further objects need to be created in order to access
-     the SD card.
-
-   * Calls to `open` can supply a full path name including parent 
-     directories which simplifies interacting with files in subdirectories.
-
-   * Utility methods are provided to determine whether a file exists
-     and to create a directory heirarchy.
-
-
-  Note however that not all functionality provided by the underlying
-  sdfatlib library is exposed.
-
- */
-
-/*
-
-  Implementation Notes
-
-  In order to handle multi-directory path traversal, functionality that 
-  requires this ability is implemented as callback functions.
-
-  Individual methods call the `walkPath` function which performs the actual
-  directory traversal (swapping between two different directory/file handles
-  along the way) and at each level calls the supplied callback function.
-
-  Some types of functionality will take an action at each level (e.g. exists
-  or make directory) which others will only take an action at the bottom
-  level (e.g. open).
-
  */
 
 #include "UD.h"
 
-namespace SDLib {
+namespace UDLib {
 
 // Used by `getNextPathComponent`
 #define MAX_COMPONENT_LEN 12 // What is max length?
 #define PATH_COMPONENT_BUFFER_LEN MAX_COMPONENT_LEN+1
 
 bool getNextPathComponent(const char *path, unsigned int *p_offset,
-			  char *buffer) {
+              char *buffer) {
   /*
-
     Parse individual path components from a path.
 
       e.g. after repeated calls '/foo/bar/baz' will be split
@@ -94,11 +50,10 @@ bool getNextPathComponent(const char *path, unsigned int *p_offset,
   if (path[offset] == '/') {
     offset++;
   }
-  
   // Copy the next next path segment
   while (bufferOffset < MAX_COMPONENT_LEN
-	 && (path[offset] != '/')
-	 && (path[offset] != '\0')) {
+     && (path[offset] != '/')
+     && (path[offset] != '\0')) {
     buffer[bufferOffset++] = path[offset++];
   }
 
@@ -117,12 +72,12 @@ bool getNextPathComponent(const char *path, unsigned int *p_offset,
 
 
 
-boolean walkPath(const char *filepath, SdFile& parentDir,
-		 boolean (*callback)(SdFile& parentDir,
-				     const char *filePathComponent,
-				     boolean isLastComponent,
-				     void *object),
-		 void *object = NULL) {
+boolean walkPath(const char *filepath, UdFile& parentDir,
+         boolean (*callback)(UdFile& parentDir,
+                     const char *filePathComponent,
+                     boolean isLastComponent,
+                     void *object),
+         void *object = NULL) {
   /*
      
      When given a file path (and parent directory--normally root),
@@ -132,7 +87,7 @@ boolean walkPath(const char *filepath, SdFile& parentDir,
 
        e.g. given the path '/foo/bar/baz'
             the callback would be called at the equivalent of
-	    '/foo', '/foo/bar' and '/foo/bar/baz'.
+        '/foo', '/foo/bar' and '/foo/bar/baz'.
 
      The implementation swaps between two different directory/file
      handles as it traverses the directories and does not use recursion
@@ -152,17 +107,17 @@ boolean walkPath(const char *filepath, SdFile& parentDir,
    */
 
 
-  SdFile subfile1;
-  SdFile subfile2;
+  UdFile subfile1;
+  UdFile subfile2;
 
   char buffer[PATH_COMPONENT_BUFFER_LEN]; 
 
   unsigned int offset = 0;
 
-  SdFile *p_parent;
-  SdFile *p_child;
+  UdFile *p_parent;
+  UdFile *p_child;
 
-  SdFile *p_tmp_sdfile;  
+  UdFile *p_tmp_sdfile;  
   
   p_child = &subfile1;
   
@@ -232,8 +187,8 @@ boolean walkPath(const char *filepath, SdFile& parentDir,
 
  */
 
-boolean callback_pathExists(SdFile& parentDir, const char *filePathComponent, 
-			    boolean /* isLastComponent */, void * /* object */) {
+boolean callback_pathExists(UdFile& parentDir, const char *filePathComponent, 
+                boolean /* isLastComponent */, void * /* object */) {
   /*
 
     Callback used to determine if a file/directory exists in parent
@@ -242,7 +197,7 @@ boolean callback_pathExists(SdFile& parentDir, const char *filePathComponent,
     Returns true if file path exists.
 
   */
-  SdFile child;
+  UdFile child;
 
   boolean exists = child.open(parentDir, filePathComponent, O_RDONLY);
   
@@ -255,8 +210,8 @@ boolean callback_pathExists(SdFile& parentDir, const char *filePathComponent,
 
 
 
-boolean callback_makeDirPath(SdFile& parentDir, const char *filePathComponent, 
-			     boolean isLastComponent, void *object) {
+boolean callback_makeDirPath(UdFile& parentDir, const char *filePathComponent, 
+                 boolean isLastComponent, void *object) {
   /*
 
     Callback used to create a directory in the parent directory if
@@ -266,7 +221,7 @@ boolean callback_makeDirPath(SdFile& parentDir, const char *filePathComponent,
 
   */
   boolean result = false;
-  SdFile child;
+  UdFile child;
   
   result = callback_pathExists(parentDir, filePathComponent, isLastComponent, object);
   if (!result) {
@@ -277,103 +232,62 @@ boolean callback_makeDirPath(SdFile& parentDir, const char *filePathComponent,
 }
 
 
-  /*
 
-boolean callback_openPath(SdFile& parentDir, char *filePathComponent, 
-			  boolean isLastComponent, void *object) {
 
-    Callback used to open a file specified by a filepath that may
-    specify one or more directories above it.
-
-    Expects the context object to be an instance of `SDClass` and
-    will use the `file` property of the instance to open the requested
-    file/directory with the associated file open mode property.
-
-    Always returns true if the directory traversal hasn't reached the
-    bottom of the directory heirarchy.
-
-    Returns false once the file has been opened--to prevent the traversal
-    from descending further. (This may be unnecessary.)
-
+boolean callback_remove(UdFile& parentDir, const char *filePathComponent, 
+            boolean isLastComponent, void * /* object */) {
   if (isLastComponent) {
-    SDClass *p_SD = static_cast<SDClass*>(object);
-    p_SD->file.open(parentDir, filePathComponent, p_SD->fileOpenMode);
-    if (p_SD->fileOpenMode == FILE_WRITE) {
-      p_SD->file.seekSet(p_SD->file.fileSize());
-    }
-    // TODO: Return file open result?
-    return false;
-  }
-  return true;
-}
-  */
-
-
-
-boolean callback_remove(SdFile& parentDir, const char *filePathComponent, 
-			boolean isLastComponent, void * /* object */) {
-  if (isLastComponent) {
-    return SdFile::remove(parentDir, filePathComponent);
+    return UdFile::remove(parentDir, filePathComponent);
   }
   return true;
 }
 
-boolean callback_rmdir(SdFile& parentDir, const char *filePathComponent, 
-			boolean isLastComponent, void * /* object */) {
+boolean callback_rmdir(UdFile& parentDir, const char *filePathComponent, 
+            boolean isLastComponent, void * /* object */) {
   if (isLastComponent) {
-    SdFile f;
+    UdFile f;
     if (!f.open(parentDir, filePathComponent, O_READ)) return false;
     return f.rmDir();
   }
   return true;
 }
 
-
-
 /* Implementation of class used to create `SDCard` object. */
-
-
-
-boolean SDClass::begin(uint8_t csPin) {
+boolean UDClass::begin(uint8_t csPin) {
   if(root.isOpen()) root.close();
-  /*
-
-    Performs the initialisation required by the sdfatlib library.
-
-    Return true if initialization succeeds, false otherwise.
-
+  /* Performs the initialisation required by the sdfatlib library.
+   * Return true if initialization succeeds, false otherwise.
    */
-  return card.init(SPI_HALF_SPEED, csPin) &&
-         volume.init(card) &&
+  return disk.init( csPin) &&
+         volume.init(disk) &&
          root.openRoot(volume);
 }
 
-boolean SDClass::begin(uint32_t clock, uint8_t csPin) {
+boolean UDClass::begin(uint32_t clock, uint8_t csPin) {
   if(root.isOpen()) root.close();
 
-  return card.init(SPI_HALF_SPEED, csPin) &&
-         card.setSpiClock(clock) &&
-         volume.init(card) &&
+  return disk.init(csPin,clock) &&
+         volume.init(disk) &&
          root.openRoot(volume);
 }
 
 //call this when a card is removed. It will allow you to insert and initialise a new card.
-void SDClass::end()
+void UDClass::end()
 {
   root.close();
 }
 
 // this little helper is used to traverse paths
-SdFile SDClass::getParentDir(const char *filepath, int *index) {
+UdFile UDClass::getParentDir(const char *filepath, int *index) {
   // get parent directory
-  SdFile d1;
-  SdFile d2;
+  UdFile d1;
+  UdFile d2;
 
   d1.openRoot(volume); // start with the mostparent, root!
 
   // we'll use the pointers to swap between the two objects
-  SdFile *parent = &d1;
-  SdFile *subdir = &d2;
+  UdFile *parent = &d1;
+  UdFile *subdir = &d2;
   
   const char *origpath = filepath;
 
@@ -402,7 +316,7 @@ SdFile SDClass::getParentDir(const char *filepath, int *index) {
     subdir->close();
     if (! subdir->open(parent, subdirname, O_READ)) {
       // failed to open one of the subdirectories
-      return SdFile();
+      return UdFile();
     }
     // move forward to the next subdirectory
     filepath += idx;
@@ -411,7 +325,7 @@ SdFile SDClass::getParentDir(const char *filepath, int *index) {
     parent->close();
 
     // swap the pointers
-    SdFile *t = parent;
+    UdFile *t = parent;
     parent = subdir;
     subdir = t;
   }
@@ -422,14 +336,14 @@ SdFile SDClass::getParentDir(const char *filepath, int *index) {
 }
 
 
-File SDClass::open(const char *filepath, uint8_t mode) {
+File UDClass::open(const char *filepath, uint8_t mode) {
   /*
 
      Open the supplied file path for reading or writing.
 
      The file content can be accessed via the `file` property of
      the `SDClass` object--this property is currently
-     a standard `SdFile` object from `sdfatlib`.
+     a standard `UdFile` object from `sdfatlib`.
 
      Defaults to read only.
 
@@ -449,7 +363,7 @@ File SDClass::open(const char *filepath, uint8_t mode) {
   int pathidx;
 
   // do the interative search
-  SdFile parentdir = getParentDir(filepath, &pathidx);
+  UdFile parentdir = getParentDir(filepath, &pathidx);
   // no more subdirs!
 
   filepath += pathidx;
@@ -460,7 +374,7 @@ File SDClass::open(const char *filepath, uint8_t mode) {
   }
 
   // Open the file itself
-  SdFile file;
+  UdFile file;
 
   // failed to open a subdir!
   if (!parentdir.isOpen())
@@ -478,96 +392,31 @@ File SDClass::open(const char *filepath, uint8_t mode) {
 }
 
 
-/*
-File SDClass::open(char *filepath, uint8_t mode) {
-  //
-
-     Open the supplied file path for reading or writing.
-
-     The file content can be accessed via the `file` property of
-     the `SDClass` object--this property is currently
-     a standard `SdFile` object from `sdfatlib`.
-
-     Defaults to read only.
-
-     If `write` is true, default action (when `append` is true) is to
-     append data to the end of the file.
-
-     If `append` is false then the file will be truncated first.
-
-     If the file does not exist and it is opened for writing the file
-     will be created.
-
-     An attempt to open a file for reading that does not exist is an
-     error.
-
-   //
-
-  // TODO: Allow for read&write? (Possibly not, as it requires seek.)
-
-  fileOpenMode = mode;
-  walkPath(filepath, root, callback_openPath, this);
-
-  return File();
-
-}
-*/
-
-
-//boolean SDClass::close() {
-//  /*
-//
-//    Closes the file opened by the `open` method.
-//
-//   */
-//  file.close();
-//}
-
-
-boolean SDClass::exists(const char *filepath) {
+boolean UDClass::exists(const char *filepath) {
   /*
-
-     Returns true if the supplied file path exists.
-
+   * Returns true if the supplied file path exists.
    */
   return walkPath(filepath, root, callback_pathExists);
 }
 
 
-//boolean SDClass::exists(char *filepath, SdFile& parentDir) {
-//  /*
-//
-//     Returns true if the supplied file path rooted at `parentDir`
-//     exists.
-//
-//   */
-//  return walkPath(filepath, parentDir, callback_pathExists);
-//}
-
-
-boolean SDClass::mkdir(const char *filepath) {
+boolean UDClass::mkdir(const char *filepath) {
   /*
-  
-    Makes a single directory or a heirarchy of directories.
-
-    A rough equivalent to `mkdir -p`.
-  
+   * Makes a single directory or a heirarchy of directories.
+   * A rough equivalent to `mkdir -p`.
    */
   return walkPath(filepath, root, callback_makeDirPath);
 }
 
-boolean SDClass::rmdir(const char *filepath) {
+boolean UDClass::rmdir(const char *filepath) {
   /*
-  
-    Remove a single directory or a heirarchy of directories.
-
-    A rough equivalent to `rm -rf`.
-  
+   * Remove a single directory or a heirarchy of directories.
+   * A rough equivalent to `rm -rf`.
    */
   return walkPath(filepath, root, callback_rmdir);
 }
 
-boolean SDClass::remove(const char *filepath) {
+boolean UDClass::remove(const char *filepath) {
   return walkPath(filepath, root, callback_remove);
 }
 
@@ -598,7 +447,7 @@ File File::openNextFile(uint8_t mode) {
     }
 
     // print file name with possible blank fill
-    SdFile f;
+    UdFile f;
     char name[13];
     _file->dirName(p, name);
     //Serial.print("try to open file ");
@@ -620,8 +469,6 @@ File File::openNextFile(uint8_t mode) {
 void File::rewindDirectory(void) {  
   if (isDirectory())
     _file->rewind();
-}
-
-SDClass SD;
-
+  }
 };
+UDLib::UDClass UD;

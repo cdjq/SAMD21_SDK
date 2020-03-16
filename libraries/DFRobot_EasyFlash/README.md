@@ -1,9 +1,5 @@
 # DFRobot_EasyFlash
 
-
-## 产品链接（www.dfrobot.com）
-    SKU：产品名称
-   
 ## Table of Contents
 
 * [Summary](#summary)
@@ -131,13 +127,6 @@ To use this library, first download the library file, paste it into the \Arduino
    */	
     size_t logSize(void);
 ```
-
-## Compatibility
-
-MCU                | Work Well    | Work Wrong   | Untested    | Remarks
------------------- | :----------: | :----------: | :---------: | -----
-FireBeetle         |      √       |              |             | 
-
 
 ## History
 

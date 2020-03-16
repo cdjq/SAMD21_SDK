@@ -1,74 +1,62 @@
-/*
-  SD card read/write
-
- This example shows how to read and write data to and from an SD card file
- The circuit:
- * SD card attached to SPI bus as follows:
- ** MOSI - pin 11
- ** MISO - pin 12
- ** CLK - pin 13
- ** CS - pin 4 (for MKRZero SD: SDCARD_SS_PIN)
-
- created   Nov 2010
- by David A. Mellis
- modified 9 Apr 2012
- by Tom Igoe
-
- This example code is in the public domain.
-
+/*!
+ * @file ReadWrite.ino
+ * @brief UD Disk read/write
+ * @n This example shows how to read and write data to and from an UD disk file
+ *
+ * @copyright   Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
+ * @licence     The MIT License (MIT)
+ * @version  V1.0
+ * @date  2019-03-5
+ * @get from https://www.dfrobot.com
  */
+#include <UD.h>
 
-#include <SPI.h>
-#include <SD.h>
-
-File myFile;
+UDFile myFile;
 
 void setup() {
   // Open serial communications and wait for port to open:
-  Serial.begin(9600);
-  while (!Serial) {
+  Serial.begin(115200);
+  while (!SerialUSB) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
 
-
-  Serial.print("Initializing SD card...");
-
-  if (!SD.begin(4)) {
-    Serial.println("initialization failed!");
+  Serial.print("Initializing UD disk...");
+  if (!UD.begin()) {
+    SerialUSB.println("initialization failed!");
     while (1);
   }
-  Serial.println("initialization done.");
+  SerialUSB.println("initialization done.");
 
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
-  myFile = SD.open("test.txt", FILE_WRITE);
+  myFile = UD.open("test.txt", FILE_WRITE);
 
   // if the file opened okay, write to it:
   if (myFile) {
-    Serial.print("Writing to test.txt...");
+    SerialUSB.print("Writing to test.txt...");
     myFile.println("testing 1, 2, 3.");
     // close the file:
     myFile.close();
-    Serial.println("done.");
+    SerialUSB.println("done.");
   } else {
     // if the file didn't open, print an error:
-    Serial.println("error opening test.txt");
+    SerialUSB.println("error opening test.txt");
   }
 
   // re-open the file for reading:
-  myFile = SD.open("test.txt");
+  myFile = UD.open("test.txt");
   if (myFile) {
-    Serial.println("test.txt:");
-
+    Serial.print("test.txt:");
     // read from the file until there's nothing else in it:
     while (myFile.available()) {
-      Serial.write(myFile.read());
+      SerialUSB.write(myFile.read());
     }
+    SerialUSB.println();
     // close the file:
     myFile.close();
   } else {
     // if the file didn't open, print an error:
-    Serial.println("error opening test.txt");
+    SerialUSB.println("error opening test.txt");
   }
 }
 

@@ -2,7 +2,10 @@
 #include <WString.h>
 #include <Stream.h>
 #include <UD.h>
+#include <SD.h>
+#ifdef ARDUINO_SAM_ZERO
 #include <variant.h>
+#endif
 
 #ifndef DFRobot_CSV_H
 #define DFRobot_CSV_H
@@ -13,6 +16,9 @@
 #undef BIN
 #endif
 #define BIN 2
+#define TYPE_CSV_UD   0
+#define TYPE_CSV_SD   1
+#define FLAG_CSV_UD   "UD:"
 
 class DFRobot_CSV
 {
@@ -26,7 +32,7 @@ typedef struct plist{
  
     DFRobot_CSV();
   //  template <class T>
-    DFRobot_CSV(File &file);
+    DFRobot_CSV(void *file);
     ~DFRobot_CSV();
 
     size_t write(uint8_t);
@@ -73,7 +79,8 @@ typedef struct plist{
 private:
     typedef struct csv_parser sCSVParse_t;
     sCSVParse_t _p;
-    File * _file;
+    void * _file;
+    uint8_t _type;
     size_t printNumber(unsigned long, uint8_t);
     size_t printFloat(double, uint8_t); 
 

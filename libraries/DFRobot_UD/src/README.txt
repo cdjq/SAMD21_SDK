@@ -1,7 +1,7 @@
 
-** SD - a slightly more friendly wrapper for sdfatlib **
+** UD - a slightly more friendly wrapper for ud disk **
 
-This library aims to expose a subset of SD card functionality in the
+This library aims to expose a subset of UD disk functionality in the
 form of a higher level "wrapper" object.
 
 License: GNU General Public License V3
