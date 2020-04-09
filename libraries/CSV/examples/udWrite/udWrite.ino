@@ -16,46 +16,46 @@
 
 void setup() {
   // Open serial communications and wait for port to open:
-  SerialUSB.begin(115200);
-  while(!SerialUSB);//等待串口打开
-  SerialUSB.print("Initializing FlashDisk...");
+  Serial.begin(115200);
+  while(!Serial);//等待串口打开
+  Serial.print("Initializing FlashDisk...");
   if (!UD.begin()) {
-    SerialUSB.println("initialization failed!");
+    Serial.println("initialization failed!");
     while(1);
   }
-  SerialUSB.println("initialization done.");
+  Serial.println("initialization done.");
   
   UDFile myFile;
   myFile = UD.open("abc.csv", FILE_WRITE);                   //以写的方式打开abc.csv文件，没有的话会创建改文件
   DFRobot_CSV csv(&myFile);
   // if the file opened okay, write to it:
   if(myFile) {
-    SerialUSB.println("Writing to test.txt...");
+    Serial.println("Writing to test.txt...");
     csv.print("group");csv.print("number");csv.println("mark");        //以csv格式往文件写入数据，用print输入每列的值，用println输入值并换行
     csv.print("\"Jerry\"");csv.print('1');csv.println(3.65);
     csv.print("3,Herny");csv.print("10");csv.println(99.5);
     // close the file:
     myFile.close();
-    SerialUSB.println("done.");
+    Serial.println("done.");
   } else {
     // if the file didn't open, print an error:
-    SerialUSB.println("error opening test.txt");
+    Serial.println("error opening abc.csv");
   }
 
   // re-open the file for reading:
   myFile = UD.open("abc.csv");
   if (myFile) {
-    SerialUSB.println("abc.csv:");
+    Serial.println("abc.csv:");
 
     // read from the file until there's nothing else in it:
     while (myFile.available()) {
-      SerialUSB.write(myFile.read());
+      Serial.write(myFile.read());
     }
     // close the file:
     myFile.close();
   } else {
     // if the file didn't open, print an error:
-    SerialUSB.println("error opening test.txt");
+    Serial.println("error opening abc.csv");
   }
 }
 

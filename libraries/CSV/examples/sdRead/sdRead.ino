@@ -16,43 +16,42 @@
 
 void setup() {
   // Open serial communications and wait for port to open:
-  SerialUSB.begin(115200);
-  while(!SerialUSB)
-  SerialUSB.print("Initializing FlashDisk...");
+  Serial.begin(115200);
+  while(!Serial)
+  Serial.print("Initializing FlashDisk...");
   if (!SD.begin(3)) {
-    SerialUSB.println("initialization failed!");
+    Serial.println("initialization failed!");
     while (1);
   }
-  SerialUSB.println("initialization done.");
+  Serial.println("initialization done.");
   File myFile;
   myFile = SD.open("abc.csv");           //以读的方式打开abc.csv文件，如果该文件不存在，先运行write.ino创建并写入abc.csv
   DFRobot_CSV csv(&myFile);
   if (myFile) {
       int row = csv.getRow();
-      SerialUSB.print("Number of rows: ");
-      SerialUSB.println(row);
-      
-      int column = csv.getColumn(1);
-      SerialUSB.print("Columns in the first row: ")
-      SerialUSB.println(column);
+      Serial.print("Number of rows: ");
+      Serial.println(row);
+      int column = csv.getColumn();
+      Serial.print("Columns in the first row: ");
+      Serial.println(column);
       
       String str[column];
       csv.readRow(1,str);
-      SerialUSB.print("The first row is: ")
+      Serial.print("The first row is: ");
       for(int j=0;j<column;j++) {
-          SerialUSB.print(str[j]);SerialUSB.print(' ');
+          Serial.print(str[j]);Serial.print(' ');
       }    
-      SerialUSB.println();
+      Serial.println();
       
       String item = csv.readItem(2,3);
-      SerialUSB.print("The field (2,3) is: ");
-      SerialUSB.println(item);
+      Serial.print("The field (2,3) is: ");
+      Serial.println(item);
 
     // close the file:
     myFile.close();
   } else {
     // if the file didn't open, print an error:
-    SerialUSB.println("error opening test.txt");
+    Serial.println("error opening test.txt");
   }
 }
 void loop() {

@@ -9,14 +9,14 @@ static void cbCountColumn(void *s, size_t i, void *data){
       case CSV_CMD_UPDATE:
            pItem->colIndex++;
            break;
-      case CSV_CMD_READ_RAW:
-          if((pItem->rawIndex == (pItem->raw - 1))&&(pItem->colIndex == 0)){
+      case CSV_CMD_READ_ROW:
+          if((pItem->rowIndex == (pItem->row - 1))&&(pItem->colIndex == 0)){
               pItem->startPos = pItem->posIndex;
           }
           pItem->posIndex += i;
           pItem->colIndex++;
           break;
-      case CSV_CMD_WRITE_RAW:
+      case CSV_CMD_WRITE_ROW:
            break;
       case CSV_CMD_READ_COL:
            pItem->colIndex++;
@@ -32,7 +32,7 @@ static void cbCountColumn(void *s, size_t i, void *data){
            break;
       case CSV_CMD_READ_ITEM:
            pItem->colIndex++;
-           if((pItem->rawIndex == (pItem->raw - 1))&&(pItem->colIndex == pItem->column)){
+           if((pItem->rowIndex == (pItem->row - 1))&&(pItem->colIndex == pItem->column)){
               pItem->startPos = pItem->posIndex;
               for(size_t j = 0; j < i; j++){
                    pItem->data += ((char *)s)[j];
@@ -43,13 +43,13 @@ static void cbCountColumn(void *s, size_t i, void *data){
            break;
       case CSV_CMD_WRITE_ITEM:
            break;
-      case CSV_CMD_ADD_RAW:
+      case CSV_CMD_ADD_ROW:
            break;
       case CSV_CMD_ADD_COL:
            break;
       case CSV_CMD_ADD_ITEM:
            break;
-	  case CSV_CMD_GET_MAXCOLOFRAW:
+	  case CSV_CMD_GET_MAXCOLOFROW:
            pItem->colIndex++;
 		   break;
   }
@@ -61,42 +61,42 @@ static void cbCountRow(int c, void *data){
            if(c < 0) pItem->colIndex -= 1;
            if(pItem->colIndex > pItem->colMax) pItem->colMax = pItem->colIndex;
            pItem->colIndex = 0;
-           pItem->rawIndex++;
-           if(pItem->rawIndex > pItem->rawMax) pItem->rawMax = pItem->rawIndex;
+           pItem->rowIndex++;
+           if(pItem->rowIndex > pItem->rowMax) pItem->rowMax = pItem->rowIndex;
            break;
-      case CSV_CMD_READ_RAW:
-           pItem->rawIndex++;
+      case CSV_CMD_READ_ROW:
+           pItem->rowIndex++;
            pItem->posIndex -= 1;
            if(c < 0) pItem->colIndex -= 1;
            pItem->posIndex += (pItem->colIndex+1);
-           if(pItem->rawIndex == pItem->raw)
+           if(pItem->rowIndex == pItem->row)
                pItem->endPos = pItem->posIndex;
            pItem->colIndex = 0;
            pItem->posIndex += 1;
            break;
-      case CSV_CMD_WRITE_RAW:
+      case CSV_CMD_WRITE_ROW:
            break;
       case CSV_CMD_READ_COL:
-           pItem->rawIndex++;
+           pItem->rowIndex++;
            pItem->colIndex = 0;
            break;
       case CSV_CMD_WRITE_COL:
            break;
       case CSV_CMD_READ_ITEM:
 	       pItem->colIndex = 0;
-           pItem->rawIndex++;
+           pItem->rowIndex++;
            break;
       case CSV_CMD_WRITE_ITEM:
            break;
-      case CSV_CMD_ADD_RAW:
+      case CSV_CMD_ADD_ROW:
            break;
       case CSV_CMD_ADD_COL:
            break;
       case CSV_CMD_ADD_ITEM:
            break;
-	  case CSV_CMD_GET_MAXCOLOFRAW:
-           pItem->rawIndex++;
-		   if(pItem->rawIndex == pItem->raw){
+	  case CSV_CMD_GET_MAXCOLOFROW:
+           pItem->rowIndex++;
+		   if(pItem->rowIndex == pItem->row){
 			   pItem->column = pItem->colIndex;
 		   }
 		   pItem->colIndex = 0;
@@ -161,21 +161,21 @@ bool DFRobot_CSV::read(String *s){
   seek(size());
   return true;
 }
-String DFRobot_CSV::readRaw(int raw){
+String DFRobot_CSV::readRow(int row){
   String s = "";
-  readRaw(raw, &s);
+  readRow(row, &s);
   seek(size());
   return s;
 }
-bool DFRobot_CSV::readRaw(int raw, String *s){//获取行的起始位置和结束位置
-  if(!raw || !s) return false;
+bool DFRobot_CSV::readRow(int row, String *s){//获取行的起始位置和结束位置
+  if(!row || !s) return false;
   *s = "";
   memset(&_item, 0, sizeof(sItem_t));
-  _item.cmd = CSV_CMD_READ_RAW;
-  _item.raw = raw;
+  _item.cmd = CSV_CMD_READ_ROW;
+  _item.row = row;
   uint16_t temp = 0,left = 0;
   seek(0);
-  while((_item.rawIndex < raw) && (temp = readBuf(_readBuf, CSV_READ_BUFFER))){
+  while((_item.rowIndex < row) && (temp = readBuf(_readBuf, CSV_READ_BUFFER))){
       _item.posIndex = position() - temp;
       if(csv_parse(&_p, _readBuf, temp, cbCountColumn, cbCountRow, &_item) != temp){
           seek(size());
@@ -183,7 +183,7 @@ bool DFRobot_CSV::readRaw(int raw, String *s){//获取行的起始位置和结�
       }
   }
   csv_fini(&_p, cbCountColumn, cbCountRow, &_item);
-  if(raw == getRaw()) _item.endPos = position() - 1;
+  if(row == getRow()) _item.endPos = position() - 1;
   left = _item.endPos - _item.startPos + 1;
   seek(_item.startPos);
   while(left){
@@ -200,9 +200,9 @@ bool DFRobot_CSV::readRaw(int raw, String *s){//获取行的起始位置和结�
   seek(size());
   return true;
 }
-bool DFRobot_CSV::writeRaw(int raw, String s){
-  if(raw > getRaw()) return false;
-  String rs = readRaw(raw);
+bool DFRobot_CSV::writeRow(int row, String s){
+  if(row > getRow()) return false;
+  String rs = readRow(row);
   int length = rs.length();
   seek(_item.endPos);
   if(peek() == '\n') length -= 2;
@@ -238,22 +238,22 @@ bool DFRobot_CSV::readColumn(int col, String *s){
   *s += _item.data;
   seek(size());
 }
-String DFRobot_CSV::readItem(int raw, int column){
+String DFRobot_CSV::readItem(int row, int column){
   String s = "";
-  readItem(raw, column, &s);
+  readItem(row, column, &s);
   seek(size());
   return s;
 }
-bool DFRobot_CSV::readItem(int raw, int column, String *s){
-  if(raw > getRaw() || !s) return false;
+bool DFRobot_CSV::readItem(int row, int column, String *s){
+  if(row > getRow() || !s) return false;
   *s = "";
   memset(&_item, 0, sizeof(sItem_t));
   _item.cmd = CSV_CMD_READ_ITEM;
-  _item.raw = raw;
+  _item.row = row;
   _item.column = column;
   uint16_t temp = 0;
   seek(0);
-  while((_item.rawIndex < raw) && (temp = readBuf(_readBuf, CSV_READ_BUFFER))){
+  while((_item.rowIndex < row) && (temp = readBuf(_readBuf, CSV_READ_BUFFER))){
       _item.posIndex = position() - temp;
       if(csv_parse(&_p, _readBuf, temp, cbCountColumn, cbCountRow, &_item) != temp){
           seek(size());
@@ -265,19 +265,19 @@ bool DFRobot_CSV::readItem(int raw, int column, String *s){
   seek(size());
 }
 
-int DFRobot_CSV::getRaw(){
+int DFRobot_CSV::getRow(){
   update();
-  return _item.rawMax;
+  return _item.rowMax;
 }
 int DFRobot_CSV::getColumn(){
   update();
   return _item.colMax;
 }
-int DFRobot_CSV::readMaxColumnOfRaw(int raw){
-  if(raw > getRaw()) return 0;
+int DFRobot_CSV::readMaxColumnOfRow(int row){
+  if(row > getRow()) return 0;
   memset(&_item, 0, sizeof(sItem_t));
-  _item.cmd = CSV_CMD_GET_MAXCOLOFRAW;
-  _item.raw = raw;
+  _item.cmd = CSV_CMD_GET_MAXCOLOFROW;
+  _item.row = row;
   uint16_t temp = 0;
   seek(0);
   while(temp = readBuf(_readBuf, CSV_READ_BUFFER)){

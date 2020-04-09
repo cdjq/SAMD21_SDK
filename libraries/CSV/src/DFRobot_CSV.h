@@ -26,15 +26,15 @@
 
 typedef struct{//存放最后一行的数据
   uint8_t cmd;
-  int rawIndex;
+  int rowIndex;
   int colIndex;
-  int startRaw;//起始行
+  int startRow;//起始行
   int startColumn;//起始列
-  int endRaw;//结束行
+  int endRow;//结束行
   int endColumn;//结束列
-  int raw; //行
+  int row; //行
   int column;//列
-  int rawMax;//最大行
+  int rowMax;//最大行
   int colMax;//最大列
   uint32_t startPos;//起始位置
   uint32_t endPos;//结束位置
@@ -46,16 +46,16 @@ static void cbCountColumn(void *s, size_t i, void *data);
 static void cbCountRow(int c, void *data);
 
 #define CSV_CMD_UPDATE  0
-#define CSV_CMD_READ_RAW  1
-#define CSV_CMD_WRITE_RAW  2
+#define CSV_CMD_READ_ROW  1
+#define CSV_CMD_WRITE_ROW  2
 #define CSV_CMD_READ_COL  3
 #define CSV_CMD_WRITE_COL  4
 #define CSV_CMD_READ_ITEM  5
 #define CSV_CMD_WRITE_ITEM  6
-#define CSV_CMD_ADD_RAW  7
+#define CSV_CMD_ADD_ROW  7
 #define CSV_CMD_ADD_COL  8
 #define CSV_CMD_ADD_ITEM  9
-#define CSV_CMD_GET_MAXCOLOFRAW  10
+#define CSV_CMD_GET_MAXCOLOFROW  10
 class DFRobot_CSV: public Print,public CommonFile{
 public:
   DFRobot_CSV();
@@ -63,23 +63,23 @@ public:
   ~DFRobot_CSV();
   void CreateNewStandardForm(int row, int column);
   bool read(String *s);//顺序读，成功返回True，失败返回false
-  String readRaw(int raw);//整行读
-  bool readRaw(int raw, String *s);//整行读
-  bool writeRaw(int raw, String s);//整行写
+  String readRow(int row);//整行读
+  bool readRow(int row, String *s);//整行读
+  bool writeRow(int row, String s);//整行写
   bool readColumn(int col, String *s);//整列读
   //bool writeColumn(int col, String *s);//整列写，暂未实现
   bool readItem(int row, int column, String *s);//定位读
   String readItem(int row, int column);//定位读
   //bool writeItem(int row, int column, String s);//定位写,暂未实现
   //bool deleteItem(int row, int column);//定位删除,暂未实现
-  //bool deleteRaw(int raw);//整行删除,自动补齐,暂未实现
-  //bool deleteColumn(int raw);//整列删除,自动补齐,暂未实现
-  //bool deleteArea(int sRaw, int sCol, int eRaw, int eCol);//整列删除,自动补齐,暂未实现
-  //bool addRaw(int raw, String s);//增加行,暂未实现
+  //bool deleteRow(int row);//整行删除,自动补齐,暂未实现
+  //bool deleteColumn(int row);//整列删除,自动补齐,暂未实现
+  //bool deleteArea(int sRow, int sCol, int eRow, int eCol);//整列删除,自动补齐,暂未实现
+  //bool addRow(int row, String s);//增加行,暂未实现
   //bool addColumn(int column, Stirng s);//增加列,暂未实现
-  int getRaw();//获取最大行
+  int getRow();//获取最大行
   int getColumn();//获取最大列，若每行列数不相等，则取所有行中最大的列数
-  int readMaxColumnOfRaw(int raw);//获取一行中的列数
+  int readMaxColumnOfRow(int row);//获取一行中的列数
   
   virtual size_t write(uint8_t val);
   size_t write(const char *str) {

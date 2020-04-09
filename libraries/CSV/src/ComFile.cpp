@@ -95,7 +95,7 @@ char * CommonFile::name(){
   if(!_file) return 0;
   switch(_type){
       case TYPE_CSV_UD:
-           return ((UDFile *)_file)->fileName();
+           return ((UDFile *)_file)->getName();
       case TYPE_CSV_SD:
            return ((File *)_file)->name();
   }

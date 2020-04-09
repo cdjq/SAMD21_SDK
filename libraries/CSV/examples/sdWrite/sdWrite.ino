@@ -39,7 +39,7 @@ void setup() {
     SerialUSB.println("done.");
   } else {
     // if the file didn't open, print an error:
-    SerialUSB.println("error opening test.txt");
+    SerialUSB.println("error opening abc.csv");
   }
 
   // re-open the file for reading:
@@ -55,7 +55,7 @@ void setup() {
     myFile.close();
   } else {
     // if the file didn't open, print an error:
-    SerialUSB.println("error opening test.txt");
+    SerialUSB.println("error opening abc.csv");
   }
 }
 
