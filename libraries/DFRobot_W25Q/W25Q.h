@@ -31,10 +31,10 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#define DEBUG
+//#define DEBUG
 #ifdef  DEBUG
 #ifdef ARDUINO_SAM_ZERO//M0板子的串口与其他串口使用方式有区别
-#define DBG(...) {SerialUSB.print("["); SerialUSB.print(__FUNCTION__); SerialUSB.print("(): "); SerialUSB.print(__LINE__); SerialUSB.print(" ] "); SerialUSB.println(__VA_ARGS__);}
+#define DBG(...) {Serial.print("["); Serial.print(__FUNCTION__); Serial.print("(): "); Serial.print(__LINE__); Serial.print(" ] "); Serial.println(__VA_ARGS__);}
 #else
 #define DBG(...) {Serial.print("["); Serial.print(__FUNCTION__); Serial.print("(): "); Serial.print(__LINE__); Serial.print(" ] "); Serial.println(__VA_ARGS__);}
 #endif

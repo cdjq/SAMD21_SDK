@@ -49,7 +49,7 @@ void printDirectory(UDFile dir, int numTabs) {
     for (uint8_t i = 0; i < numTabs; i++) {
       SerialUSB.print('\t');
     }
-    SerialUSB.print(entry.name());
+    SerialUSB.print(entry.getName());
     if (entry.isDirectory()) {
       SerialUSB.println("/");
       printDirectory(entry, numTabs + 1);

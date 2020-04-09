@@ -201,7 +201,7 @@ void W25QClass::eraseChip(){
   W25Q_CHIP_CS_HIGH;
 }
 void W25QClass::eraseSector(uint32_t addr, bool isFirstAddr){
-  if((addr > W25Q_BLOCK_ADDR_END)||(isFirstAddr && (!(addr%W25Q_SECTOR_SIZE)))) 
+  if((addr > W25Q_BLOCK_ADDR_END)||(isFirstAddr && (addr%W25Q_SECTOR_SIZE))) 
       return;
   while(waitBusy());
   while(!writeEnable(eNonVolMode));
@@ -213,7 +213,7 @@ void W25QClass::eraseSector(uint32_t addr, bool isFirstAddr){
   W25Q_CHIP_CS_HIGH;
 }
 void W25QClass::eraseBlock32(uint32_t addr, bool isFirstAddr){
-  if((addr > W25Q_BLOCK_ADDR_END)||(isFirstAddr && (!(addr%(W25Q_BLOCK_SIZE/2))))) 
+  if((addr > W25Q_BLOCK_ADDR_END)||(isFirstAddr && (addr%(W25Q_BLOCK_SIZE/2)))) 
       return;
   while(waitBusy());
   while(!writeEnable(eNonVolMode));
@@ -225,7 +225,7 @@ void W25QClass::eraseBlock32(uint32_t addr, bool isFirstAddr){
   W25Q_CHIP_CS_HIGH;
 }
 void W25QClass::eraseBlock64(uint32_t addr, bool isFirstAddr){
-  if((addr > W25Q_BLOCK_ADDR_END)||(isFirstAddr && (!(addr%W25Q_BLOCK_SIZE)))) 
+  if((addr > W25Q_BLOCK_ADDR_END)||(isFirstAddr && (addr%W25Q_BLOCK_SIZE))) 
       return;
   while(waitBusy());
   while(!writeEnable(eNonVolMode));

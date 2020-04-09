@@ -156,6 +156,7 @@ private:
 	uint32_t epType[3];
 };
 extern Serial_ SerialUSB;
+#define Serial SerialUSB
 
 #endif
 #endif

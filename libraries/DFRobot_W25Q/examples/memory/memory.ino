@@ -17,34 +17,34 @@ uint32_t addr = 0xFFFFFE;
 uint32_t secFirstAddr, blockFirstAddr,block32FirstAddr;
 uint16_t secNumber, blockNumber;
 void setup() {
-  SerialUSB.begin(115200);
-  SerialUSB.print("Initializating W25Q device...");
+  Serial.begin(115200);
+  Serial.print("Initializating W25Q device...");
   while(!W25Q.begin()){
-    SerialUSB.println("initialization failed!");
+    Serial.println("initialization failed!");
   }
-  while(!SerialUSB.available());
-  SerialUSB.read();SerialUSB.read();SerialUSB.read();
-  SerialUSB.println("initialization done!");
+  while(!Serial.available());
+  Serial.read();Serial.read();Serial.read();
+  Serial.println("initialization done!");
   secFirstAddr = W25Q.getSectorFirstAddr(addr, &secNumber);
   blockFirstAddr = W25Q.getBlock64FirstAddr(addr, &blockNumber);
   block32FirstAddr = W25Q.getBlock64FirstAddr(addr);
-  SerialUSB.print("The first Address of the sector of 0xFFFFE: ");
-  SerialUSB.println(secFirstAddr,HEX);
-  SerialUSB.print("Sector Number：");
-  SerialUSB.println(secNumber);
-  SerialUSB.print("The first Address of the block of 0xFFFFE: ");
-  SerialUSB.println(blockFirstAddr,HEX);
-  SerialUSB.print("Block Number: ");
-  SerialUSB.println(blockNumber);
+  Serial.print("The first Address of the sector of 0xFFFFE: ");
+  Serial.println(secFirstAddr,HEX);
+  Serial.print("Sector Number：");
+  Serial.println(secNumber);
+  Serial.print("The first Address of the block of 0xFFFFE: ");
+  Serial.println(blockFirstAddr,HEX);
+  Serial.print("Block Number: ");
+  Serial.println(blockNumber);
 
   String str1 = "hello,world",str2 ="No data!";
 
   W25Q.eraseSector(secFirstAddr);
   W25Q.readFlash(addr, &str2, str1.length());
-  SerialUSB.println(str2,HEX);
+  Serial.println(str2,HEX);
   W25Q.writeFlash(addr, &str1, str1.length());
   W25Q.readFlash(addr, &str2, str1.length());
-  SerialUSB.println(str2,HEX);
+  Serial.println(str2,HEX);
 }
 
 void loop() {

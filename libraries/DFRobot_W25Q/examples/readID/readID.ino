@@ -20,26 +20,26 @@
 
 void setup() {
   Serial.begin(115200);
-  SerialUSB.print("Initializating W25Q device...");
+  Serial.print("Initializating W25Q device...");
   while(!W25Q.begin()){
-    SerialUSB.println("initialization failed!");
+    Serial.println("initialization failed!");
   }
-  SerialUSB.println("initialization done!");
+  Serial.println("initialization done!");
 }
 
 void loop() {
-  SerialUSB.print("Unique ID: ");
+  Serial.print("Unique ID: ");
   String id = W25Q.readUniqueID();
-  SerialUSB.println(id);
-  SerialUSB.print("Manufacter ID and Device ID: ");
+  Serial.println(id);
+  Serial.print("Manufacter ID and Device ID: ");
   uint16_t mDevID = W25Q.readManufacterAndDeviceID();
-  SerialUSB.println(mDevID,HEX);
-  SerialUSB.print("Device ID: ");
+  Serial.println(mDevID,HEX);
+  Serial.print("Device ID: ");
   uint8_t devID = W25Q.readDeviceID();
-  SerialUSB.println(devID,HEX);
-  SerialUSB.print("Capacity: ");
-  SerialUSB.print(W25Q.readFlashCapacityByte());
-  SerialUSB.println(" Bytes");
-  SerialUSB.println();
+  Serial.println(devID,HEX);
+  Serial.print("Capacity: ");
+  Serial.print(W25Q.readFlashCapacityByte());
+  Serial.println(" Bytes");
+  Serial.println();
   delay(5000);
 }

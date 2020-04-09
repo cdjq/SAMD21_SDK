@@ -1,0 +1,26 @@
+#######################################
+# Syntax Coloring Map For GSM
+####################################### 
+# Class
+#######################################
+
+DFRobot_CSV	KEYWORD1
+
+#######################################
+# Methods and Functions 
+#######################################	
+
+CreateNewStandardForm	KEYWORD2
+read	KEYWORD2
+gatVoiceCallStatus	KEYWORD2
+readRaw	KEYWORD2
+writeRaw	KEYWORD2
+readColumn	KEYWORD2
+readItem	KEYWORD2
+getRaw	KEYWORD2
+getColumn	KEYWORD2
+readMaxColumnOfRaw	KEYWORD2
+
+#######################################
+# Constants
+#######################################

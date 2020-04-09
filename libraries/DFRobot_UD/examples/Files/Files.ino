@@ -1,65 +1,32 @@
-/*!
- * @file Files.ino
- * @brief UD disk basic file example.
- * @n This example shows how to create and destroy an UD disk file
- *
- * @copyright   Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
- * @licence     The MIT License (MIT)
- * @version  V1.0
- * @date  2019-03-5
- * @get from https://www.dfrobot.com
- */
+#include "Arduino.h"
+#include "DFRobot_IL0376F_SPI.h"
+DFRobot_IL0376F_SPI eink;
 
-#include <UD.h>
+#define EINK_CS  D3
+#define Font_CS  D6
+#define EINK_DC  D8
+#define BUSY     D7
 
-UDFile myFile;
+void setup(void)
+{
+    Serial.begin(115200);
+    //Select the corresponding pins
+    eink.begin(EINK_CS, Font_CS, EINK_DC, BUSY);
 
-void setup() {
-  // Open serial communications and wait for port to open:
-  SerialUSB.begin(115200);
-  while (!SerialUSB) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
-  SerialUSB.print("Initializing UD disk...");
-
-  if (!UD.begin()) {
-    SerialUSB.println("initialization failed!");
-    while(1);
-  }
-  Serial.println("initialization done.");
-
-  if (UD.exists("example.txt")) {
-    SerialUSB.println("example.txt exists.");
-  } else {
-    SerialUSB.println("example.txt doesn't exist.");
-  }
-
-  // open a new file and immediately close it:
-  SerialUSB.println("Creating example.txt...");
-  myFile = UD.open("example.txt", FILE_WRITE);
-  myFile.close();
-
-  // Check to see if the file exists:
-  if (UD.exists("example.txt")) {
-    SerialUSB.println("example.txt exists.");
-  } else {
-    SerialUSB.println("example.txt doesn't exist.");
-  }
-
-  // delete the file:
-  SerialUSB.println("Removing example.txt...");
-  UD.remove("example.txt");
-
-  if (UD.exists("example.txt")) {
-    SerialUSB.println("example.txt exists.");
-  } else {
-    SerialUSB.println("example.txt doesn't exist.");
-  }
+    //Clear the screen and display white
+    eink.fillScreen(WHITE);
+    //Displays a string, red font
+    eink.disString(12,12,1,"DFRobot EINK 1234567890,!@#$%^&*()-+=",RED);
+    //Refresh screen display
+    eink.flush();
+ 
 }
 
-void loop() {
-  // nothing happens after setup finishes.
+void loop(void)
+{
+     delay(3000);
+    //Displays a string, red font
+    eink.disString(12,48,1,"DFRobot三色电子墨水屏测试程序",BLACK);
+    //Refresh screen display
+    eink.flush();
 }
-
-
-
