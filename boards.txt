@@ -16,10 +16,10 @@
 
 # FireBeetle M0 (with) Bootloader
 # ----------------------------
-mzero_bl.name=FireBeetle M0
-mzero_bl.vid.0=0x2341
+mzero_bl.name=DFRobot SAMD Boards
+mzero_bl.vid.0=0x3343
 mzero_bl.pid.0=0x0244
-mzero_bl.vid.1=0x2341
+mzero_bl.vid.1=0x3343
 mzero_bl.pid.1=0x8244
 mzero_bl.upload.tool=avrdude
 mzero_bl.upload.protocol=stk500v2
@@ -38,7 +38,7 @@ mzero_bl.build.ldscript=linker_scripts/gcc/flash_with_bootloader.ld
 mzero_bl.build.openocdscript=openocd_scripts/arduino_zero.cfg
 mzero_bl.build.variant=arduino_mzero
 mzero_bl.build.variant_system_lib=
-mzero_bl.build.vid=0x2341
+mzero_bl.build.vid=0x3343
 mzero_bl.build.pid=0x8244
 mzero_bl.build.preferred_out_format=hex
 mzero_bl.bootloader.size=0x8000

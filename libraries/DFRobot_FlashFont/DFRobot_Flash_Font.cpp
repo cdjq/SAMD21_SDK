@@ -45,14 +45,11 @@ void DFRobot_Flash_Font::cache(String &s){
 
 void DFRobot_Flash_Font::readUni(){
   uint32_t uni=0;
-  if ( _utf8[_index] == 0 || _utf8[_index] == '\n' )  /* '\n' terminates the string to support the string list procedures */{
-    uni=0xff;
-    _index++;
-    DBG("index")DBG(_index);
-    DBG("uni");DBG(uni);
-    charData.ucode=uni;	
-  } 
-  
+  // if ( _utf8[_index] == 0 || _utf8[_index] == '\n' )  /* '\n' terminates the string to support the string list procedures */{
+  //   uni=0xff;
+  //   _index++;
+  //   charData.ucode=uni;	
+  // } 
   uint8_t utf8State = 0;
   if(_utf8[_index] >= 0xfc){
       utf8State = 5;

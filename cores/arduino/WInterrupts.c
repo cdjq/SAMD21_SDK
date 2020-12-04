@@ -67,8 +67,7 @@ void attachInterrupt(uint32_t pin, voidFuncPtr callback, uint32_t mode)
 #else
   EExt_Interrupts in = digitalPinToInterrupt(pin);
 #endif
-  if (in == NOT_AN_INTERRUPT || in == EXTERNAL_INT_NMI)
-    return;
+  if (in == NOT_AN_INTERRUPT) return;
 
   if (!enabled) {
     __initialize();
@@ -79,67 +78,98 @@ void attachInterrupt(uint32_t pin, voidFuncPtr callback, uint32_t mode)
   uint32_t inMask = 1 << in;
   EIC->WAKEUP.reg |= inMask;
 
-  // Assign pin to EIC
-  pinPeripheral(pin, PIO_EXTINT);
-
-  // Only store when there is really an ISR to call.
-  // This allow for calling attachInterrupt(pin, NULL, mode), we set up all needed register
-  // but won't service the interrupt, this way we also don't need to check it inside the ISR.
   if (callback)
   {
-    // Store interrupts to service in order of when they were attached
-    // to allow for first come first serve handler
-    uint32_t current = 0;
+      if (in == EXTERNAL_INT_NMI) {
+          EIC->NMIFLAG.bit.NMI = 1; // Clear flag
+          switch (mode) {
+            case LOW:
+              EIC->NMICTRL.bit.NMISENSE = EIC_NMICTRL_NMISENSE_LOW;
+              break;
 
-    // Check if we already have this interrupt
-    for (current=0; current<nints; current++) {
-      if (ISRlist[current] == inMask) {
-        break;
+            case HIGH:
+              EIC->NMICTRL.bit.NMISENSE = EIC_NMICTRL_NMISENSE_HIGH;
+              break;
+
+            case CHANGE:
+              EIC->NMICTRL.bit.NMISENSE = EIC_NMICTRL_NMISENSE_BOTH;
+              break;
+
+            case FALLING:
+              EIC->NMICTRL.bit.NMISENSE = EIC_NMICTRL_NMISENSE_FALL;
+              break;
+
+            case RISING:
+              EIC->NMICTRL.bit.NMISENSE = EIC_NMICTRL_NMISENSE_RISE;
+              break;
+          }
+
+          // Assign callback to interrupt
+          ISRcallback[EXTERNAL_INT_NMI] = callback;
+
+      } else { // Not NMI, is external interrupt
+
+          // Assign pin to EIC
+          pinPeripheral(pin, PIO_EXTINT);
+
+          // Store interrupts to service in order of when they were attached
+          // to allow for first come first serve handler
+          uint32_t current = 0;
+
+          // Check if we already have this interrupt
+          for (current=0; current<nints; current++) {
+            if (ISRlist[current] == inMask) {
+              break;
+            }
+          }
+          if (current == nints) {
+            // Need to make a new entry
+            nints++;
+          }
+          ISRlist[current] = inMask;       // List of interrupt in order of when they were attached
+          ISRcallback[current] = callback; // List of callback adresses
+
+          // Look for right CONFIG register to be addressed
+          if (in > EXTERNAL_INT_7) {
+            config = 1;
+            pos = (in - 8) << 2;
+          } else {
+            config = 0;
+            pos = in << 2;
+          }
+
+          #if defined (__SAMD51__)
+          EIC->CTRLA.bit.ENABLE = 0;
+          while (EIC->SYNCBUSY.bit.ENABLE == 1) { }
+          #endif
+
+          EIC->CONFIG[config].reg &=~ (EIC_CONFIG_SENSE0_Msk << pos); // Reset sense mode, important when changing trigger mode during runtime
+          switch (mode)
+          {
+            case LOW:
+              EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_LOW_Val << pos;
+              break;
+
+            case HIGH:
+              EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_HIGH_Val << pos;
+              break;
+
+            case CHANGE:
+              EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_BOTH_Val << pos;
+              break;
+
+            case FALLING:
+              EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_FALL_Val << pos;
+              break;
+
+            case RISING:
+              EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_RISE_Val << pos;
+              break;
+          }
       }
-    }
-    if (current == nints) {
-      // Need to make a new entry
-      nints++;
-    }
-    ISRlist[current] = inMask;       // List of interrupt in order of when they were attached
-    ISRcallback[current] = callback; // List of callback adresses
-
-    // Look for right CONFIG register to be addressed
-    if (in > EXTERNAL_INT_7) {
-      config = 1;
-      pos = (in - 8) << 2;
-    } else {
-      config = 0;
-      pos = in << 2;
-    }
-
-    // Configure the interrupt mode
-    EIC->CONFIG[config].reg &=~ (EIC_CONFIG_SENSE0_Msk << pos); // Reset sense mode, important when changing trigger mode during runtime
-    switch (mode)
-    {
-      case LOW:
-        EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_LOW_Val << pos;
-        break;
-
-      case HIGH:
-        EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_HIGH_Val << pos;
-        break;
-
-      case CHANGE:
-        EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_BOTH_Val << pos;
-        break;
-
-      case FALLING:
-        EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_FALL_Val << pos;
-        break;
-
-      case RISING:
-        EIC->CONFIG[config].reg |= EIC_CONFIG_SENSE0_RISE_Val << pos;
-        break;
-    }
+      // Enable the interrupt
+      EIC->INTENSET.reg = EIC_INTENSET_EXTINT(1 << in);
   }
-  // Enable the interrupt
-  EIC->INTENSET.reg = EIC_INTENSET_EXTINT(inMask);
 }
 
 /*
@@ -152,14 +182,15 @@ void detachInterrupt(uint32_t pin)
 #else
   EExt_Interrupts in = digitalPinToInterrupt(pin);
 #endif 
-  if (in == NOT_AN_INTERRUPT || in == EXTERNAL_INT_NMI)
+  if (in == NOT_AN_INTERRUPT)
     return;
-
   uint32_t inMask = 1 << in;
-  EIC->INTENCLR.reg = EIC_INTENCLR_EXTINT(inMask);
-  
-  // Disable wakeup capability on pin during sleep
-  EIC->WAKEUP.reg &= ~inMask;
+  if(in == EXTERNAL_INT_NMI) {
+    EIC->NMICTRL.bit.NMISENSE = 0; // Turn off detection
+  } else {
+    EIC->INTENCLR.reg = EIC_INTENCLR_EXTINT(1 << in);
+    EIC->WAKEUP.reg &= ~(1 << in);
+  }
 
   // Remove callback from the ISR list
   uint32_t current;
@@ -197,4 +228,10 @@ void EIC_Handler(void)
       EIC->INTFLAG.reg = ISRlist[i];
     }
   }
+}
+
+void NMI_Handler(void)
+{
+  if (ISRcallback[EXTERNAL_INT_NMI]) ISRcallback[EXTERNAL_INT_NMI]();
+  EIC->NMIFLAG.bit.NMI = 1; // Clear interrupt
 }
