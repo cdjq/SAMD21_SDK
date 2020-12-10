@@ -112,7 +112,7 @@ DFRobot_CSV::DFRobot_CSV(): CommonFile(NULL)
   _flag = 1;
 }
 
-DFRobot_CSV::DFRobot_CSV(void *file):CommonFile(file){
+DFRobot_CSV::DFRobot_CSV(File *file):CommonFile(file){
   csv_init(&_p,0);
   memset(_readBuf,0,sizeof(_readBuf));
   memset(_writeBuf,0,sizeof(_writeBuf));

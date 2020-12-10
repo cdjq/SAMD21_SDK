@@ -1,5 +1,5 @@
 /*!
- * @file sdRead.ino
+ * @file read.ino
  * @brief 打开abc.csv文件，获得总的行数，和指定行的列数，读取指定的行的值，指定位置的值，并打印出来
  * @n 实验现象：串口监视器打印出abc.csv文件指定的内容
  *
@@ -14,15 +14,26 @@
 
 #include<DFRobot_CSV.h>
 
+#define ONBOARD_UD_M0_CS 32 // The cs pin of Firebeetle M0 the onboard U disk is 32
+#define NONBOARD_SD_MOUDLE_CS 2//spi 模块的cs引脚连接到M0的数字2引脚
+
 void setup() {
   // Open serial communications and wait for port to open:
   Serial.begin(115200);
   while(!Serial)
   Serial.print("Initializing FlashDisk...");
-  if (!SD.begin(3)) {
-    Serial.println("initialization failed!");
-    while (1);
+
+/*如果使用M0板载的U盘，初始化如下*/
+  if (!SD.begin(/*csPin = */ONBOARD_UD_M0_CS, /*type = */TYPE_ONBOARD_UD_SAMD)) {
+    SerialUSB.println("initialization failed!");
+    while(1);
   }
+  
+/*如果外部连接是spi SD卡模块，初始化如下*/
+  //if (!SD.begin(/*csPin = */NONBOARD_SD_MOUDLE_CS, /*type = */TYPE_NONBOARD_SD_MOUDLE)) {
+  //  SerialUSB.println("initialization failed!");
+  //  while(1);
+  //}
   Serial.println("initialization done.");
   File myFile;
   myFile = SD.open("abc.csv");           //以读的方式打开abc.csv文件，如果该文件不存在，先运行write.ino创建并写入abc.csv
@@ -51,7 +62,7 @@ void setup() {
     myFile.close();
   } else {
     // if the file didn't open, print an error:
-    Serial.println("error opening test.txt");
+    Serial.println("error opening abc.csv");
   }
 }
 void loop() {

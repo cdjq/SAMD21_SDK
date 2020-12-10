@@ -1,7 +1,6 @@
 #include "csv.h"
 #include <WString.h>
 #include <Stream.h>
-#include <UD.h>
 #include <SD.h>
 #include "ComFile.h"
 #ifdef ARDUINO_SAM_ZERO
@@ -17,9 +16,6 @@
 #undef BIN
 #endif
 #define BIN 2
-#define TYPE_CSV_UD   1
-#define TYPE_CSV_SD   2
-#define FLAG_CSV_UD   "UD:"
 #define FILE_SEND_SIZE  0xFFFF
 #define CSV_WRITE_BUFFER     512
 #define CSV_READ_BUFFER     512
@@ -59,7 +55,7 @@ static void cbCountRow(int c, void *data);
 class DFRobot_CSV: public Print,public CommonFile{
 public:
   DFRobot_CSV();
-  DFRobot_CSV(void *file);
+  DFRobot_CSV(File *file);
   ~DFRobot_CSV();
   void CreateNewStandardForm(int row, int column);
   bool read(String *s);//顺序读，成功返回True，失败返回false

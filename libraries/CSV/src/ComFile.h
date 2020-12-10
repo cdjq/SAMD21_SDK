@@ -17,13 +17,11 @@ typedef struct{
 #define __COMFILE_H
 
 #include <Arduino.h>
-#include <UD.h>
 #include <SD.h>
-#define TYPE_CSV_UD   1
-#define TYPE_CSV_SD   2
+
 class CommonFile{
 public:
-  CommonFile(void *file);
+  CommonFile(File *file);
   CommonFile();
   size_t writeBuf(void *pBuf, size_t nbyte);
   int readBuf(void *pBuf, uint16_t nbyte);
@@ -37,9 +35,7 @@ public:
   bool move(uint32_t startIndex, uint32_t destIndex);
   //bool deleteChar(uint32_t startIndex, uint32_t length);
   char * name();
-  uint8_t type();
 private:
-  uint8_t _type;
-  void *_file;
+  File *_file;
 };
 #endif

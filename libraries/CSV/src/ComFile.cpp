@@ -1,115 +1,49 @@
 #include "ComFile.h"
-CommonFile::CommonFile(void *file)
-  :_type(0),_file(file){
-  char *nameType = ((UDFile *)_file)->name();
-  String str = String(nameType);
-  if(str.length()>3){
-        String sType = str.substring(0, 3);
-        if((sType == "UD:") && (sType.length() < str.length())){
-            _type = TYPE_CSV_UD;
-        }else{
-            _type = TYPE_CSV_SD;
-        }
-    }else{
-        _type = TYPE_CSV_SD;
-    }
-}
-CommonFile::CommonFile(): _type(0),_file(NULL){}
+CommonFile::CommonFile(File *file)
+  :_file(file){}
+
+CommonFile::CommonFile():_file(NULL){}
 
 size_t CommonFile::writeBuf(void *pBuf, size_t nbyte){
   if((!pBuf) || (!_file)) return 0;
   uint8_t *buf = (uint8_t *)pBuf;
-  switch(_type){
-      case TYPE_CSV_UD:
-           return ((UDFile *)_file)->write(buf, nbyte);
-      case TYPE_CSV_SD:
-           return ((File *)_file)->write(buf, nbyte);
-  }
+  return _file->write(buf, nbyte);
 }
 int CommonFile::readBuf(void *pBuf, uint16_t nbyte){
   if(!pBuf || (!_file)) return 0;
   uint8_t *buf = (uint8_t *)pBuf;
-  switch(_type){
-      case TYPE_CSV_UD:
-           return ((UDFile *)_file)->read(buf, nbyte);
-      case TYPE_CSV_SD:
-           return ((File *)_file)->read(buf, nbyte);
-  }
+  return _file->read(buf, nbyte);
 }
 
 int CommonFile::peek(){
   if(!_file) return 0;
-  switch(_type){
-      case TYPE_CSV_UD:
-           return ((UDFile *)_file)->peek();
-      case TYPE_CSV_SD:
-           return ((File *)_file)->peek();
-  }
+  return _file->peek();
 }
 int CommonFile::available(){
   if(!_file) return 0;
-  switch(_type){
-      case TYPE_CSV_UD:
-           return ((UDFile *)_file)->available();
-      case TYPE_CSV_SD:
-           return ((File *)_file)->available();
-  }
+  return _file->available();
 }
 void CommonFile::flush(){
   if(!_file) return;
-  switch(_type){
-      case TYPE_CSV_UD:
-           ((UDFile *)_file)->flush();
-      case TYPE_CSV_SD:
-           ((File *)_file)->flush();
-  }
+  _file->flush();
 }
 boolean CommonFile::seek(uint32_t pos){
   if(!_file) return false;
-  switch(_type){
-      case TYPE_CSV_UD:
-           return ((UDFile *)_file)->seek(pos);
-      case TYPE_CSV_SD:
-           return ((File *)_file)->seek(pos);
-  }
+  return _file->seek(pos);
 }
 uint32_t CommonFile::position(){
   if(!_file) return 0;
-  switch(_type){
-      case TYPE_CSV_UD:
-           return ((UDFile *)_file)->position();
-      case TYPE_CSV_SD:
-           return ((File *)_file)->position();
-  }
+  return _file->position();
 }
 uint32_t CommonFile::size(){
   if(!_file) return 0;
-  switch(_type){
-      case TYPE_CSV_UD:
-           return ((UDFile *)_file)->size();
-      case TYPE_CSV_SD:
-           return ((File *)_file)->size();
-  }
+  return _file->size();
 }
 char * CommonFile::name(){
   if(!_file) return 0;
-  switch(_type){
-      case TYPE_CSV_UD:
-           return ((UDFile *)_file)->getName();
-      case TYPE_CSV_SD:
-           return ((File *)_file)->name();
-  }
+  return _file->name();
 }
-uint8_t CommonFile::type(){
-  switch(_type){
-      case TYPE_CSV_UD:
-           return TYPE_CSV_UD;
-      case TYPE_CSV_SD:
-           return TYPE_CSV_SD;
-      default:
-           return 0;
-  }
-}
+
 bool CommonFile::insert(uint32_t index, void *buf, size_t nbyte){
   if(!buf) return false;
   if(index > size()) index = size();
