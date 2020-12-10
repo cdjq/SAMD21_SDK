@@ -1,0 +1,16 @@
+---- TYPE_SPI_W25Q Matches (15 in 6 files) ----
+SD.cpp (src):  if(type == TYPE_SPI_W25Q){
+SD.cpp (src):  if(type == TYPE_SPI_W25Q){
+SD.h (src)://#define TYPE_SPI_W25Q    1//用的SPI和W25Q flash通信
+SD.h (src):  boolean begin(uint8_t csPin = UD_CHIP_SELECT_PIN, uint8_t type = TYPE_SPI_W25Q);
+Sd2Card.cpp (src\utility):  if(_type == TYPE_SPI_W25Q){
+Sd2Card.cpp (src\utility):  if(_type == TYPE_SPI_W25Q){
+Sd2Card.cpp (src\utility):  if(_type == TYPE_SPI_W25Q){
+Sd2Card.cpp (src\utility):  if(_type == TYPE_SPI_W25Q){
+Sd2Card.cpp (src\utility):      if(_type == TYPE_SPI_W25Q){
+Sd2Card.cpp (src\utility):  if(_type == TYPE_SPI_W25Q){
+Sd2Card.h (src\utility):#define TYPE_SPI_W25Q    1//用的SPI和W25Q flash通信
+SdFat.h (src\utility):  if(dev->_type == TYPE_SPI_W25Q) return init(dev, 0);
+SdVolume.cpp (src\utility):  if(sdCard_->_type == TYPE_SPI_W25Q){
+SdVolume.cpp (src\utility):  if(sdCard_->_type == TYPE_SPI_W25Q){
+SdVolume.cpp (src\utility):  if(sdCard_->_type == TYPE_SPI_W25Q){
