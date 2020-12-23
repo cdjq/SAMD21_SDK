@@ -292,7 +292,7 @@ Serial_::operator bool()
 
 	bool result = false;
 
-	if (_usbLineInfo.lineState > 0)
+	if (_usbLineInfo.lineState & CDC_LINESTATE_DTR)
 	{
 		result = true;
 	}
